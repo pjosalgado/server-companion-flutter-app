@@ -1,4 +1,4 @@
-name: Web deployment - Production
+name: Vercel deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -20,12 +20,28 @@ jobs:
         run: flutter pub get
       - name: Build web version
         run: flutter build web
+      - name: Compact the build result
+        run: tar -czf web-build.tar.gz build/web
+      - name: Upload the build result to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: web-build
+          path: web-build.tar.gz
   Deploy-Production:
     name: Deploy production to Vercel
     needs: Build-Web
+    environment: 
+      name: Vercel
+      url: https://server-companion.vercel.app
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Download the build result from artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: web-build
+      - name: Get the build result file content
+        run: tar -xzf web-build.tar.gz
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       - name: Pull Vercel environment information
