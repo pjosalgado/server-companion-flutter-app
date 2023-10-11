@@ -1,0 +1,49 @@
+name: Web deployment - Preview
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+on:
+  push:
+    branches-ignore:
+      - master
+jobs:
+  Build-Web:
+    name: Build web version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build web version
+        run: flutter build web
+      - name: Compact the build result
+        run: tar -czf web-build.tar.gz build/web
+      - name: Upload the build result to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: web-build
+          path: web-build.tar.gz
+  Deploy-Preview:
+    name: Deploy preview to Vercel
+    needs: Build-Web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download the build result from artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: web-build
+      - name: Get the build result file content
+        run: tar -xzf web-build.tar.gz
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel environment information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }} ./build/web
+      - name: Build project artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --cwd ./build/web
+      - name: Deploy project artifacts to Vercel
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} ./build/web
