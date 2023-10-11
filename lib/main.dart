@@ -56,8 +56,9 @@ class _CompanionHomeState extends State<CompanionHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text( _barTitle),
         backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text(_barTitle),
+        foregroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.settings),

@@ -20,25 +20,12 @@ jobs:
         run: flutter pub get
       - name: Build web version
         run: flutter build web
-      - name: Compact the build result
-        run: tar -czf web-build.tar.gz build/web
-      - name: Upload the build result to artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: web-build
-          path: web-build.tar.gz
   Deploy-Production:
     name: Deploy production to Vercel
     needs: Build-Web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download the build result from artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: web-build
-      - name: Get the build result file content
-        run: tar -xzf web-build.tar.gz
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       - name: Pull Vercel environment information
