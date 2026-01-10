@@ -22,7 +22,7 @@ COPY web /app/web
 RUN flutter build web
 
 
-FROM nginx:1.25-alpine
+FROM nginx:1.29.4-alpine
 
 LABEL maintainer="Paulo Salgado <pjosalgado@gmail.com>"
 LABEL version="1.0.0-1"
